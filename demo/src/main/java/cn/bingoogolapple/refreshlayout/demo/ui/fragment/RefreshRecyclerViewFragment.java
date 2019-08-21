@@ -11,10 +11,10 @@ import android.widget.TextView;
 
 import java.util.List;
 
-import cn.bingoogolapple.androidcommon.adapter.BGAOnItemChildClickListener;
-import cn.bingoogolapple.androidcommon.adapter.BGAOnItemChildLongClickListener;
-import cn.bingoogolapple.androidcommon.adapter.BGAOnRVItemClickListener;
-import cn.bingoogolapple.androidcommon.adapter.BGAOnRVItemLongClickListener;
+import cn.bingoogolapple.baseadapter.BGAOnItemChildClickListener;
+import cn.bingoogolapple.baseadapter.BGAOnItemChildLongClickListener;
+import cn.bingoogolapple.baseadapter.BGAOnRVItemClickListener;
+import cn.bingoogolapple.baseadapter.BGAOnRVItemLongClickListener;
 import cn.bingoogolapple.refreshlayout.BGARefreshLayout;
 import cn.bingoogolapple.refreshlayout.BGAStickinessRefreshViewHolder;
 import cn.bingoogolapple.refreshlayout.demo.R;
@@ -93,7 +93,8 @@ public class RefreshRecyclerViewFragment extends BaseFragment implements BGARefr
                 ((TextView) getViewById(R.id.tv_custom_header2_desc)).setText(R.string.test_custom_header_desc);
             }
         }, 2000);
-        mRefreshLayout.setCustomHeaderView(headerView, true);
+//        mRefreshLayout.setCustomHeaderView(headerView, true);
+        mAdapter.addHeaderView(headerView);
 
         BGAStickinessRefreshViewHolder stickinessRefreshViewHolder = new BGAStickinessRefreshViewHolder(mApp, true);
         stickinessRefreshViewHolder.setStickinessColor(R.color.colorPrimary);
@@ -105,17 +106,17 @@ public class RefreshRecyclerViewFragment extends BaseFragment implements BGARefr
         mDataRv.setLayoutManager(new GridLayoutManager(mApp, 2, GridLayoutManager.VERTICAL, false));
 //        mDataRv.setLayoutManager(new LinearLayoutManager(mApp, LinearLayoutManager.VERTICAL, false));
 
-        mDataRv.setAdapter(mAdapter);
+        mDataRv.setAdapter(mAdapter.getHeaderAndFooterAdapter());
     }
 
     @Override
-    protected void onFirstUserVisible() {
+    protected void onLazyLoadOnce() {
         mNewPageNumber = 0;
         mMorePageNumber = 0;
         mEngine.loadInitDatas().enqueue(new Callback<List<RefreshModel>>() {
             @Override
             public void onResponse(Call<List<RefreshModel>> call, Response<List<RefreshModel>> response) {
-                mAdapter.setDatas(response.body());
+                mAdapter.setData(response.body());
             }
 
             @Override
@@ -142,7 +143,7 @@ public class RefreshRecyclerViewFragment extends BaseFragment implements BGARefr
                     public void run() {
                         mRefreshLayout.endRefreshing();
                         dismissLoadingDialog();
-                        mAdapter.addNewDatas(response.body());
+                        mAdapter.addNewData(response.body());
                         mDataRv.smoothScrollToPosition(0);
                     }
                 }, MainActivity.LOADING_DURATION);
@@ -174,7 +175,7 @@ public class RefreshRecyclerViewFragment extends BaseFragment implements BGARefr
                     public void run() {
                         mRefreshLayout.endLoadingMore();
                         dismissLoadingDialog();
-                        mAdapter.addMoreDatas(response.body());
+                        mAdapter.addMoreData(response.body());
                     }
                 }, MainActivity.LOADING_DURATION);
             }

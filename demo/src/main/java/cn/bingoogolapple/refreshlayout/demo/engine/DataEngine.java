@@ -3,11 +3,10 @@ package cn.bingoogolapple.refreshlayout.demo.engine;
 import android.content.Context;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.bumptech.glide.request.RequestOptions;
 
 import cn.bingoogolapple.bgabanner.BGABanner;
 import cn.bingoogolapple.refreshlayout.demo.App;
@@ -26,20 +25,28 @@ public class DataEngine {
 
     public static View getCustomHeaderView(final Context context) {
         View headerView = View.inflate(context, R.layout.view_custom_header, null);
-        final BGABanner banner = (BGABanner) headerView.findViewById(R.id.banner);
-        final List<View> views = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            views.add(View.inflate(context, R.layout.view_image, null));
-        }
-        banner.setViews(views);
+        final BGABanner banner = headerView.findViewById(R.id.banner);
+        banner.setAdapter(new BGABanner.Adapter<ImageView, String>() {
+            @Override
+            public void fillBannerItem(BGABanner banner, ImageView itemView, String model, int position) {
+                Glide.with(itemView.getContext())
+                        .load(model)
+                        .apply(new RequestOptions().placeholder(R.mipmap.holder).error(R.mipmap.holder).dontAnimate().centerCrop())
+                        .into(itemView);
+            }
+        });
+        banner.setDelegate(new BGABanner.Delegate<ImageView, String>() {
+            @Override
+            public void onBannerItemClick(BGABanner banner, ImageView imageView, String model, int position) {
+                Toast.makeText(banner.getContext(), "点击了第" + (position + 1) + "页", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         App.getInstance().getEngine().getBannerModel().enqueue(new Callback<BannerModel>() {
             @Override
             public void onResponse(Call<BannerModel> call, Response<BannerModel> response) {
                 BannerModel bannerModel = response.body();
-                for (int i = 0; i < views.size(); i++) {
-                    Glide.with(context).load(bannerModel.imgs.get(i)).placeholder(R.mipmap.holder).error(R.mipmap.holder).dontAnimate().thumbnail(0.1f).into((ImageView) views.get(i));
-                }
-                banner.setTips(bannerModel.tips);
+                banner.setData(R.layout.view_image, bannerModel.imgs, bannerModel.tips);
             }
 
             @Override

@@ -11,8 +11,8 @@ import android.widget.GridView;
 
 import java.util.List;
 
-import cn.bingoogolapple.androidcommon.adapter.BGAOnItemChildClickListener;
-import cn.bingoogolapple.androidcommon.adapter.BGAOnItemChildLongClickListener;
+import cn.bingoogolapple.baseadapter.BGAOnItemChildClickListener;
+import cn.bingoogolapple.baseadapter.BGAOnItemChildLongClickListener;
 import cn.bingoogolapple.refreshlayout.BGAMoocStyleRefreshViewHolder;
 import cn.bingoogolapple.refreshlayout.BGARefreshLayout;
 import cn.bingoogolapple.refreshlayout.demo.R;
@@ -88,13 +88,13 @@ public class RefreshGridViewFragment extends BaseFragment implements BGARefreshL
     }
 
     @Override
-    protected void onFirstUserVisible() {
+    protected void onLazyLoadOnce() {
         mNewPageNumber = 0;
         mMorePageNumber = 0;
         mEngine.loadInitDatas().enqueue(new Callback<List<RefreshModel>>() {
             @Override
             public void onResponse(Call<List<RefreshModel>> call, Response<List<RefreshModel>> response) {
-                mAdapter.setDatas(response.body());
+                mAdapter.setData(response.body());
             }
 
             @Override
@@ -122,7 +122,7 @@ public class RefreshGridViewFragment extends BaseFragment implements BGARefreshL
                         @Override
                         public void run() {
                             mRefreshLayout.endRefreshing();
-                            mAdapter.addNewDatas(response.body());
+                            mAdapter.addNewData(response.body());
                         }
                     }, MainActivity.LOADING_DURATION);
                 }
@@ -161,7 +161,7 @@ public class RefreshGridViewFragment extends BaseFragment implements BGARefreshL
                         @Override
                         public void run() {
                             mRefreshLayout.endLoadingMore();
-                            mAdapter.addMoreDatas(response.body());
+                            mAdapter.addMoreData(response.body());
                         }
                     }, MainActivity.LOADING_DURATION);
                 }

@@ -8,10 +8,10 @@ import android.view.ViewGroup;
 
 import java.util.List;
 
-import cn.bingoogolapple.androidcommon.adapter.BGAOnItemChildClickListener;
-import cn.bingoogolapple.androidcommon.adapter.BGAOnItemChildLongClickListener;
-import cn.bingoogolapple.androidcommon.adapter.BGAOnRVItemClickListener;
-import cn.bingoogolapple.androidcommon.adapter.BGAOnRVItemLongClickListener;
+import cn.bingoogolapple.baseadapter.BGAOnItemChildClickListener;
+import cn.bingoogolapple.baseadapter.BGAOnItemChildLongClickListener;
+import cn.bingoogolapple.baseadapter.BGAOnRVItemClickListener;
+import cn.bingoogolapple.baseadapter.BGAOnRVItemLongClickListener;
 import cn.bingoogolapple.refreshlayout.BGAMoocStyleRefreshViewHolder;
 import cn.bingoogolapple.refreshlayout.BGARefreshLayout;
 import cn.bingoogolapple.refreshlayout.demo.R;
@@ -66,7 +66,8 @@ public class RefreshSwipeRecyclerViewFragment extends BaseFragment implements BG
 
     @Override
     protected void processLogic(Bundle savedInstanceState) {
-        mRefreshLayout.setCustomHeaderView(DataEngine.getCustomHeaderView(mApp), false);
+//        mRefreshLayout.setCustomHeaderView(DataEngine.getCustomHeaderView(mApp), false);
+        mAdapter.addHeaderView(DataEngine.getCustomHeaderView(mApp));
 
         BGAMoocStyleRefreshViewHolder moocStyleRefreshViewHolder = new BGAMoocStyleRefreshViewHolder(mApp, true);
         moocStyleRefreshViewHolder.setOriginalImage(R.mipmap.bga_refresh_moooc);
@@ -74,21 +75,19 @@ public class RefreshSwipeRecyclerViewFragment extends BaseFragment implements BG
         mRefreshLayout.setRefreshViewHolder(moocStyleRefreshViewHolder);
 
         mDataRv.addItemDecoration(new Divider(mApp));
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(mApp);
-        linearLayoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        mDataRv.setLayoutManager(linearLayoutManager);
+        mDataRv.setLayoutManager(new LinearLayoutManager(mApp));
 
-        mDataRv.setAdapter(mAdapter);
+        mDataRv.setAdapter(mAdapter.getHeaderAndFooterAdapter());
     }
 
     @Override
-    protected void onFirstUserVisible() {
+    protected void onLazyLoadOnce() {
         mNewPageNumber = 0;
         mMorePageNumber = 0;
         mEngine.loadInitDatas().enqueue(new Callback<List<RefreshModel>>() {
             @Override
             public void onResponse(Call<List<RefreshModel>> call, Response<List<RefreshModel>> response) {
-                mAdapter.setDatas(response.body());
+                mAdapter.setData(response.body());
             }
 
             @Override
@@ -112,7 +111,7 @@ public class RefreshSwipeRecyclerViewFragment extends BaseFragment implements BG
                     @Override
                     public void run() {
                         mRefreshLayout.endRefreshing();
-                        mAdapter.addNewDatas(response.body());
+                        mAdapter.addNewData(response.body());
                         mDataRv.smoothScrollToPosition(0);
                     }
                 }, MainActivity.LOADING_DURATION);
@@ -140,7 +139,7 @@ public class RefreshSwipeRecyclerViewFragment extends BaseFragment implements BG
                     @Override
                     public void run() {
                         mRefreshLayout.endLoadingMore();
-                        mAdapter.addMoreDatas(response.body());
+                        mAdapter.addMoreData(response.body());
                     }
                 }, MainActivity.LOADING_DURATION);
             }

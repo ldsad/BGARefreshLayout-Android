@@ -8,8 +8,8 @@ import android.view.ViewGroup;
 
 import java.util.List;
 
-import cn.bingoogolapple.androidcommon.adapter.BGAOnRVItemClickListener;
-import cn.bingoogolapple.androidcommon.adapter.BGAOnRVItemLongClickListener;
+import cn.bingoogolapple.baseadapter.BGAOnRVItemClickListener;
+import cn.bingoogolapple.baseadapter.BGAOnRVItemLongClickListener;
 import cn.bingoogolapple.refreshlayout.BGANormalRefreshViewHolder;
 import cn.bingoogolapple.refreshlayout.BGARefreshLayout;
 import cn.bingoogolapple.refreshlayout.demo.R;
@@ -63,13 +63,13 @@ public class RefreshStaggeredRecyclerViewFragment extends BaseFragment implement
     }
 
     @Override
-    protected void onFirstUserVisible() {
+    protected void onLazyLoadOnce() {
         mNewPageNumber = 0;
         mMorePageNumber = 0;
         mEngine.loadDefaultStaggeredData().enqueue(new Callback<List<StaggeredModel>>() {
             @Override
             public void onResponse(Call<List<StaggeredModel>> call, Response<List<StaggeredModel>> response) {
-                mAdapter.setDatas(response.body());
+                mAdapter.setData(response.body());
             }
 
             @Override
@@ -93,7 +93,7 @@ public class RefreshStaggeredRecyclerViewFragment extends BaseFragment implement
                     @Override
                     public void run() {
                         mRefreshLayout.endRefreshing();
-                        mAdapter.addNewDatas(response.body());
+                        mAdapter.addNewData(response.body());
                         mDataRv.smoothScrollToPosition(0);
                     }
                 }, MainActivity.LOADING_DURATION);
@@ -121,7 +121,7 @@ public class RefreshStaggeredRecyclerViewFragment extends BaseFragment implement
                     @Override
                     public void run() {
                         mRefreshLayout.endLoadingMore();
-                        mAdapter.addMoreDatas(response.body());
+                        mAdapter.addMoreData(response.body());
                     }
                 }, MainActivity.LOADING_DURATION);
             }

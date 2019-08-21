@@ -8,17 +8,18 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import cn.bingoogolapple.androidcommon.adapter.BGAOnItemChildClickListener;
-import cn.bingoogolapple.androidcommon.adapter.BGAOnItemChildLongClickListener;
-import cn.bingoogolapple.androidcommon.adapter.BGAOnRVItemClickListener;
-import cn.bingoogolapple.androidcommon.adapter.BGAOnRVItemLongClickListener;
+import cn.bingoogolapple.baseadapter.BGAOnItemChildClickListener;
+import cn.bingoogolapple.baseadapter.BGAOnItemChildLongClickListener;
+import cn.bingoogolapple.baseadapter.BGAOnRVItemClickListener;
+import cn.bingoogolapple.baseadapter.BGAOnRVItemLongClickListener;
 import cn.bingoogolapple.bgabanner.BGABanner;
 import cn.bingoogolapple.refreshlayout.BGANormalRefreshViewHolder;
 import cn.bingoogolapple.refreshlayout.BGARefreshLayout;
+import cn.bingoogolapple.refreshlayout.demo.App;
 import cn.bingoogolapple.refreshlayout.demo.R;
 import cn.bingoogolapple.refreshlayout.demo.adapter.SwipeRecyclerViewAdapter;
 import cn.bingoogolapple.refreshlayout.demo.model.BannerModel;
@@ -84,7 +85,7 @@ public class SwipeRecyclerViewActivity extends BaseActivity implements BGAOnRVIt
         mEngine.loadInitDatas().enqueue(new Callback<List<RefreshModel>>() {
             @Override
             public void onResponse(Call<List<RefreshModel>> call, Response<List<RefreshModel>> response) {
-                mAdapter.setDatas(response.body());
+                mAdapter.setData(response.body());
             }
 
             @Override
@@ -94,19 +95,22 @@ public class SwipeRecyclerViewActivity extends BaseActivity implements BGAOnRVIt
     }
 
     private void initBanner() {
-        final List<View> views = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            views.add(View.inflate(this, R.layout.view_image, null));
-        }
-        mBanner.setViews(views);
-        mEngine.getBannerModel().enqueue(new Callback<BannerModel>() {
+        mBanner.setAdapter(new BGABanner.Adapter<ImageView, String>() {
+            @Override
+            public void fillBannerItem(BGABanner banner, ImageView itemView, String model, int position) {
+                Glide.with(itemView.getContext())
+                        .load(model)
+                        .apply(new RequestOptions().placeholder(R.mipmap.holder).error(R.mipmap.holder).dontAnimate())
+                        .thumbnail(0.1f)
+                        .into(itemView);
+            }
+        });
+
+        App.getInstance().getEngine().getBannerModel().enqueue(new Callback<BannerModel>() {
             @Override
             public void onResponse(Call<BannerModel> call, Response<BannerModel> response) {
                 BannerModel bannerModel = response.body();
-                for (int i = 0; i < views.size(); i++) {
-                    Glide.with(SwipeRecyclerViewActivity.this).load(bannerModel.imgs.get(i)).placeholder(R.mipmap.holder).error(R.mipmap.holder).dontAnimate().thumbnail(0.1f).into((ImageView) views.get(i));
-                }
-                mBanner.setTips(bannerModel.tips);
+                mBanner.setData(R.layout.view_image, bannerModel.imgs, bannerModel.tips);
             }
 
             @Override
@@ -165,7 +169,7 @@ public class SwipeRecyclerViewActivity extends BaseActivity implements BGAOnRVIt
             @Override
             public void onResponse(Call<List<RefreshModel>> call, Response<List<RefreshModel>> response) {
                 mRefreshLayout.endRefreshing();
-                mAdapter.addNewDatas(response.body());
+                mAdapter.addNewData(response.body());
                 mDataRv.smoothScrollToPosition(0);
             }
 
@@ -188,7 +192,7 @@ public class SwipeRecyclerViewActivity extends BaseActivity implements BGAOnRVIt
             @Override
             public void onResponse(Call<List<RefreshModel>> call, Response<List<RefreshModel>> response) {
                 mRefreshLayout.endLoadingMore();
-                mAdapter.addMoreDatas(response.body());
+                mAdapter.addMoreData(response.body());
             }
 
             @Override

@@ -5,18 +5,16 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.view.View;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.bumptech.glide.request.RequestOptions;
 
 import cn.bingoogolapple.bgabanner.BGABanner;
 import cn.bingoogolapple.bgaindicator.BGAFixedIndicator;
 import cn.bingoogolapple.refreshlayout.BGANormalRefreshViewHolder;
 import cn.bingoogolapple.refreshlayout.BGARefreshLayout;
+import cn.bingoogolapple.refreshlayout.demo.App;
 import cn.bingoogolapple.refreshlayout.demo.R;
 import cn.bingoogolapple.refreshlayout.demo.model.BannerModel;
 import cn.bingoogolapple.refreshlayout.demo.ui.fragment.StickyNavListViewFragment;
@@ -76,19 +74,22 @@ public class ViewPagerActivity extends BaseActivity implements BGARefreshLayout.
     }
 
     private void initBanner() {
-        final List<View> views = new ArrayList<>();
-        for (int i = 0; i < 5; i++) {
-            views.add(View.inflate(this, R.layout.view_image, null));
-        }
-        mBanner.setViews(views);
-        mEngine.getBannerModel().enqueue(new Callback<BannerModel>() {
+        mBanner.setAdapter(new BGABanner.Adapter<ImageView, String>() {
+            @Override
+            public void fillBannerItem(BGABanner banner, ImageView itemView, String model, int position) {
+                Glide.with(itemView.getContext())
+                        .load(model)
+                        .apply(new RequestOptions().placeholder(R.mipmap.holder).error(R.mipmap.holder).dontAnimate())
+                        .thumbnail(0.1f)
+                        .into(itemView);
+            }
+        });
+
+        App.getInstance().getEngine().getBannerModel().enqueue(new Callback<BannerModel>() {
             @Override
             public void onResponse(Call<BannerModel> call, Response<BannerModel> response) {
                 BannerModel bannerModel = response.body();
-                for (int i = 0; i < views.size(); i++) {
-                    Glide.with(ViewPagerActivity.this).load(bannerModel.imgs.get(i)).placeholder(R.mipmap.holder).error(R.mipmap.holder).dontAnimate().thumbnail(0.1f).into((ImageView) views.get(i));
-                }
-                mBanner.setTips(bannerModel.tips);
+                mBanner.setData(R.layout.view_image, bannerModel.imgs, bannerModel.tips);
             }
 
             @Override
