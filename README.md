@@ -61,13 +61,14 @@
 ### 基本使用
 
 #### 1.添加 Gradle 依赖
-[![Download](https://api.bintray.com/packages/bingoogolapple/maven/bga-refreshlayout/images/download.svg)](https://bintray.com/bingoogolapple/maven/bga-refreshlayout/_latestVersion) bga-refreshlayout 后面的「latestVersion」指的是左边这个 Download 徽章后面的「数字」，请自行替换。
+* 非 androidx 项目用 cn.bingoogolapple:bga-refreshlayout:1.1.8
+* androidx 项目用 [![Download](https://api.bintray.com/packages/bingoogolapple/maven/bga-refreshlayout-androidx/images/download.svg)](https://bintray.com/bingoogolapple/maven/bga-refreshlayout-androidx/_latestVersion) bga-refreshlayout-androidx 后面的「latestVersion」指的是左边这个 Download 徽章后面的「数字」，请自行替换。
 
 ```groovy
 dependencies {
-    implementation 'com.android.support:recyclerview-v7:27.0.2'
-    implementation 'com.android.support:support-v4:27.0.2'
-    implementation 'cn.bingoogolapple:bga-refreshlayout:latestVersion@aar'
+    implementation 'androidx.recyclerview:recyclerview:1.0.0'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'cn.bingoogolapple:bga-refreshlayout-androidx:latestVersion@aar'
 }
 ```
 
